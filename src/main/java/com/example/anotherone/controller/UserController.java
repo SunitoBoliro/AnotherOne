@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 
 @RestController
@@ -30,7 +31,7 @@ public class UserController {
 
     @GetMapping("/{id}")
     @Operation(summary = "Get user by ID")
-    public User getUserById(@PathVariable int id) {
+    public Optional<User> getUserById(@PathVariable int id) {
         return userService.getUserById(id);
     }
 
@@ -42,7 +43,7 @@ public class UserController {
 
     @PutMapping("/{id}")
     @Operation(summary = "Update a user")
-    public User updateUser(@PathVariable int id, @RequestBody User user) {
+    public Optional<User> updateUser(@PathVariable int id, @RequestBody User user) {
         return userService.updateUser(id, user);
     }
 

@@ -1,42 +1,54 @@
 package com.example.anotherone.service;
 
 import com.example.anotherone.model.User;
+import com.example.anotherone.repository.UserRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import java.util.Optional;
 
 @Service
 public class UserService {
-    private final Map<Integer, User> users = new HashMap<>();
-    private int currentId = 1;
 
-    public List<User> getAllUsers(){
-        return new ArrayList<>(users.values());
+    private final UserRepository userRepository;
+
+    @Autowired
+    public UserService(UserRepository userRepository) {
+        this.userRepository = userRepository;
     }
 
-    public User getUserById(int id){
-        return users.get(id);
+    // Get all users
+    public List<User> getAllUsers() {
+        return userRepository.findAll();
     }
 
-    public User createUser(User user){
-        user.setId(++currentId);
-        users.put(user.getId(), user);
-        return user;
+    // Get user by ID
+    public Optional<User> getUserById(int id) {
+        return userRepository.findById(id);
     }
 
-    public User updateUser(int id, User updateduser){
-        if (users.containsKey(id)){
-            updateduser.setId(id);
-            users.put(id, updateduser);
-            return updateduser;
-        }
-        return null;
+    // Create new user
+    public User createUser(User user) {
+        return userRepository.save(user);
     }
 
+    // Update existing user
+    public Optional<User> updateUser(int id, User updatedUser) {
+        return userRepository.findById(id).map(existingUser -> {
+            existingUser.setFirstName(updatedUser.getFirstName());
+            existingUser.setLastName(updatedUser.getLastName());
+            existingUser.setEmail(updatedUser.getEmail());
+            return userRepository.save(existingUser);
+        });
+    }
+
+    // Delete user
     public boolean deleteUser(int id) {
-        return users.remove(id) != null;
+        if (userRepository.existsById(id)) {
+            userRepository.deleteById(id);
+            return true;
+        }
+        return false;
     }
 }

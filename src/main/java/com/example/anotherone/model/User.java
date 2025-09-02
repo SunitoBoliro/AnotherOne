@@ -1,36 +1,62 @@
 package com.example.anotherone.model;
 
-public class User {
-    private int id;
-    private String name;
-    private String email;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
 
-    public User(int id, String name, String email){
+@Document(collection = "users")
+public class User {
+
+    @Id
+    private int id;
+    private String firstName;
+    private String lastName;
+    private String email;
+    // getters, setters, constructors
+
+
+    // No-args constructor (needed by frameworks like Hibernate, Jackson)
+    // All-args constructor
+    public User(int id, String firstName, String lastName, String email) {
         this.id = id;
-        this.name = name;
+        this.firstName = firstName;
+        this.lastName = lastName;
         this.email = email;
     }
 
-    public int getId(){
+    // Getters & Setters
+    public int getId() {
         return id;
     }
-    public void setId(int id){
+
+    public void setId(int id) {
         this.id = id;
     }
 
-    public String getName(){
-        return name;
-    }
-    public void setName(String name){
-        this.name = name;
+    public String getFirstName() {
+        return firstName;
     }
 
-    public String getEmail(){
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
+
+    public String getLastName() {
+        return lastName;
+    }
+
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
+    }
+
+    public String getFullName() {
+        return firstName + " " + lastName;
+    }
+
+    public String getEmail() {
         return email;
     }
 
-    public void setEmail(String email){
+    public void setEmail(String email) {
         this.email = email;
     }
-
 }
