@@ -8,7 +8,7 @@ public class AnotherOneApplication {
     //saney_commit//
     public static void main(String[] args) {
         SpringApplication.run(AnotherOneApplication.class, args);
-        for (int i = 0; i < 1; i++) {
+        for (int i = 0; i < 2; i++) {
             continue;
         }
     }
