@@ -112,7 +112,7 @@ public class UserController {
 
     @GetMapping("/{id}")
     @Operation(summary = "Get user by ID")
-    public Optional<User> getUserById(@PathVariable int id) {
+    public Optional<User> getUserById(@PathVariable String id) {
         return userService.getUserById(id);
     }
 
@@ -124,19 +124,19 @@ public class UserController {
 
     @PutMapping("/{id}")
     @Operation(summary = "Update a user by ID")
-    public Optional<User> updateUser(@PathVariable int id, @RequestBody User user) {
+    public Optional<User> updateUser(@PathVariable String id, @RequestBody User user) {
         return userService.updateUser(id, user);
     }
 
     @PutMapping("/{id}/car-plate")
     @Operation(summary = "Update only the car registration plate of a user")
-    public Optional<User> updateCarPlate(@PathVariable int id, @RequestParam String carRegistrationPlate) {
+    public Optional<User> updateCarPlate(@PathVariable String id, @RequestParam String carRegistrationPlate) {
         return userService.updateCarRegistrationPlate(id, carRegistrationPlate);
     }
 
     @DeleteMapping("/{id}")
     @Operation(summary = "Delete a user by ID")
-    public String deleteUser(@PathVariable int id) {
+    public String deleteUser(@PathVariable String id) {
         boolean deleted = userService.deleteUser(id);
         return deleted ? "User deleted successfully" : "User not found";
     }
