@@ -65,9 +65,12 @@ public class UserService {
 package com.example.anotherone.service;
 
 import com.example.anotherone.model.User;
+import com.example.anotherone.model.UserCRUDGenModal;
+import com.example.anotherone.repository.UserRepoReg;
 import com.example.anotherone.repository.UserRepository;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -75,9 +78,11 @@ import java.util.Optional;
 public class UserService {
 
     private final UserRepository userRepository;
+    private final UserRepoReg userRepoReg;
 
-    public UserService(UserRepository userRepository) {
+    public UserService(UserRepository userRepository,  UserRepoReg userRepoReg) {
         this.userRepository = userRepository;
+        this.userRepoReg = userRepoReg;
     }
 
     // Create or Update User
@@ -85,6 +90,10 @@ public class UserService {
         return userRepository.save(user);
     }
 
+    //Reg New User
+    public List<UserCRUDGenModal> regNewUser(UserCRUDGenModal user) {
+        return Collections.singletonList(userRepoReg.save(user));
+    }
     // Get all users
     public List<User> getAllUsers() {
         return userRepository.findAll();
