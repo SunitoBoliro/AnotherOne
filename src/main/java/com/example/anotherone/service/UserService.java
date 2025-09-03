@@ -68,11 +68,10 @@ import com.example.anotherone.model.User;
 import com.example.anotherone.model.UserCRUDGenModal;
 import com.example.anotherone.repository.UserRepoReg;
 import com.example.anotherone.repository.UserRepository;
+import org.springframework.data.mongodb.core.aggregation.ArithmeticOperators;
 import org.springframework.stereotype.Service;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 public class UserService {
@@ -92,7 +91,9 @@ public class UserService {
 
     //Reg New User
     public List<UserCRUDGenModal> regNewUser(UserCRUDGenModal user) {
+        user.f_verificationCode = UUID.randomUUID().toString();
         return Collections.singletonList(userRepoReg.save(user));
+
     }
     // Get all users
     public List<User> getAllUsers() {
