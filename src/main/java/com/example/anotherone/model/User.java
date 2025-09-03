@@ -7,7 +7,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 public class User {
 
     @Id
-    private int id;
+    private String id;
     private String firstName;
     private String lastName;
     private String email;
@@ -17,7 +17,7 @@ public class User {
     public User() {}
 
     // All-args constructor
-    public User(int id, String firstName, String lastName, String email, String carRegistrationPlate) {
+    public User(String id, String firstName, String lastName, String email, String carRegistrationPlate) {
         this.id = id;
         this.firstName = firstName;
         this.lastName = lastName;
@@ -26,11 +26,11 @@ public class User {
     }
 
     // Getters & Setters
-    public int getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(String id) {
         this.id = id;
     }
 
