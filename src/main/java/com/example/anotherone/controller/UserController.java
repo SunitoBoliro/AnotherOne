@@ -82,7 +82,6 @@ public class UserController {
 package com.example.anotherone.controller;
 
 import com.example.anotherone.model.User;
-import com.example.anotherone.model.UserCRUDGenModal;
 import com.example.anotherone.service.UserService;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -111,16 +110,9 @@ public class UserController {
         return userService.getAllUsers();
     }
 
-
-    @PostMapping("/{reg-user}")
-    @Operation(summary = "Create new User with email, password and verification Code")
-    public List<UserCRUDGenModal> registerUser(@RequestBody UserCRUDGenModal userCRUDGenModal) {
-        return userService.regNewUser(userCRUDGenModal);
-    }
-
     @GetMapping("/{id}")
     @Operation(summary = "Get user by ID")
-    public Optional<User> getUserById(@PathVariable String id) {
+    public Optional<User> getUserById(@PathVariable int id) {
         return userService.getUserById(id);
     }
 
@@ -132,21 +124,20 @@ public class UserController {
 
     @PutMapping("/{id}")
     @Operation(summary = "Update a user by ID")
-    public Optional<User> updateUser(@PathVariable String id, @RequestBody User user) {
+    public Optional<User> updateUser(@PathVariable int id, @RequestBody User user) {
         return userService.updateUser(id, user);
     }
 
     @PutMapping("/{id}/car-plate")
     @Operation(summary = "Update only the car registration plate of a user")
-    public Optional<User> updateCarPlate(@PathVariable String id, @RequestParam String carRegistrationPlate) {
+    public Optional<User> updateCarPlate(@PathVariable int id, @RequestParam String carRegistrationPlate) {
         return userService.updateCarRegistrationPlate(id, carRegistrationPlate);
     }
 
     @DeleteMapping("/{id}")
     @Operation(summary = "Delete a user by ID")
-    public String deleteUser(@PathVariable String id) {
+    public String deleteUser(@PathVariable int id) {
         boolean deleted = userService.deleteUser(id);
         return deleted ? "User deleted successfully" : "User not found";
     }
-
 }
