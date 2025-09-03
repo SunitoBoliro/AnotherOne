@@ -82,6 +82,7 @@ public class UserController {
 package com.example.anotherone.controller;
 
 import com.example.anotherone.model.User;
+import com.example.anotherone.model.UserCRUDGenModal;
 import com.example.anotherone.service.UserService;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -108,6 +109,13 @@ public class UserController {
     @Operation(summary = "Get all users")
     public List<User> getAllUsers() {
         return userService.getAllUsers();
+    }
+
+
+    @PostMapping("/{reg-user}")
+    @Operation(summary = "Create new User with email, password and verification Code")
+    public List<UserCRUDGenModal> registerUser(@RequestBody UserCRUDGenModal userCRUDGenModal) {
+        return userService.regNewUser(userCRUDGenModal);
     }
 
     @GetMapping("/{id}")
@@ -140,4 +148,5 @@ public class UserController {
         boolean deleted = userService.deleteUser(id);
         return deleted ? "User deleted successfully" : "User not found";
     }
+
 }
