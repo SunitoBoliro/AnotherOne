@@ -85,6 +85,8 @@ import com.example.anotherone.model.ExpandoObj;
 import com.example.anotherone.model.User;
 import com.example.anotherone.model.UserCRUDGenModal;
 import com.example.anotherone.service.UserService;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -92,6 +94,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -115,9 +118,23 @@ public class UserController {
 
     @PostMapping("/{reg-user}")
     @Operation(summary = "Create new User with email, password and verification Code")
-    public List<ExpandoObj> registerUser(@RequestBody UserCRUDGenModal userCRUDGenModal) {
-        return userService.regNewUser(userCRUDGenModal);
+    public List<ExpandoObj> registerUser(@RequestBody UserCRUDGenModal userCRUDGenModal) throws UserService.EmailAlreadyExistsException {
+        return Collections.singletonList(userService.registerNewUser(userCRUDGenModal));
     }
+
+    @GetMapping("/verify/{code}")
+    @Operation(summary = "Verify user with code")
+    public ResponseEntity<?> verifyUser(@PathVariable String code) throws UserService.UserNotFoundException {
+        ExpandoObj verifiedUser = userService.verifyUser(code);
+
+        if (verifiedUser == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body("Invalid verification code");
+        }
+
+        return ResponseEntity.ok(verifiedUser);
+    }
+
 
     @GetMapping("/{id}")
     @Operation(summary = "Get user by ID")
