@@ -1,69 +1,115 @@
 package com.example.anotherone.service;
 
+import com.example.anotherone.EmailService.EmailService;
+import com.example.anotherone.JwtUtil;
 import com.example.anotherone.model.ExpandoObj;
-import com.example.anotherone.model.User;
 import com.example.anotherone.model.UserCRUDGenModal;
 import com.example.anotherone.repository.UserRepoReg;
-import com.example.anotherone.repository.UserRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.security.SecureRandom;
-import java.util.List;
-import java.util.Optional;
+import java.util.Map;
+import java.util.Objects;
 
 @Service
 public class UserService {
 
     private static final SecureRandom random = new SecureRandom();
+    private UserRepoReg userRepoReg;
+    private EmailService emailService;
+    private JwtUtil jwtUtil;
 
-    private final UserRepository userRepository;
-    private final UserRepoReg userRepoReg;
-
-    public UserService(UserRepository userRepository, UserRepoReg userRepoReg) {
-        this.userRepository = userRepository;
+    public UserService(UserRepoReg userRepoReg, EmailService emailService, JwtUtil jwtUtil) {
         this.userRepoReg = userRepoReg;
+        this.emailService = emailService;
+        this.jwtUtil = jwtUtil;
     }
-
-    // ----------------- CRUD Operations -----------------
-
-    public User saveUser(User user) {
-        return userRepository.save(user);
-    }
-
-    public List<User> getAllUsers() {
-        return userRepository.findAll();
-    }
-
-    public Optional<User> getUserById(String id) {
-        return userRepository.findById(id);
-    }
-
-    public Optional<User> updateUser(String id, User updatedUser) {
-        return userRepository.findById(id).map(user -> {
-            user.setFirstName(updatedUser.getFirstName());
-            user.setLastName(updatedUser.getLastName());
-            user.setEmail(updatedUser.getEmail());
-            user.setCarRegistrationPlate(updatedUser.getCarRegistrationPlate());
-            return userRepository.save(user);
-        });
-    }
-
-    public Optional<User> updateCarRegistrationPlate(String id, String carRegistrationPlate) {
-        return userRepository.findById(id).map(user -> {
-            user.setCarRegistrationPlate(carRegistrationPlate);
-            return userRepository.save(user);
-        });
-    }
-
-    public boolean deleteUser(String id) {
-        if (userRepository.existsById(id)) {
-            userRepository.deleteById(id);
-            return true;
-        }
-        return false;
-    }
-
     // ----------------- Registration & Verification -----------------
+
+    // ----------------- Free Wash Code -----------------
+
+    public Object enduseFreeWash(String email, String carRegNum, String code) {
+
+        ExpandoObj user = userRepoReg.findByEmail(email);
+        if (user == null) {
+            return Map.of("status", "error", "message", "User not found");
+        }
+
+        // 2. Check if user has a car registered
+        String carObj = user.carRegistrationPlate;
+        if (carObj == null) {
+            return Map.of("status", "error", "message", "Car registration not found");
+        }
+
+        // 3. Check if free wash is available
+        if (user.freeWashCount == 1 && Objects.equals(user.freewashCode, code)) {
+            // 4. Generate 6-digit free wash code
+
+            // 5. Mark as used
+            user.freeWashCount = 0;
+            user.freewashCode = "USED";
+            userRepoReg.save(user);
+
+            return Map.of(
+                    "status", "success",
+                    "message", "You have Now Used your Free Wash",
+                    "freeWashCode", user.freewashCode
+            );
+        } else {
+            return Map.of("status", "error", "message", "You have already used your free wash");
+        }
+    }
+    public Object useFreeWash(String email, String carRegNumber) {
+        // 1. Find user by email
+        ExpandoObj user = userRepoReg.findByEmail(email);
+        if (user == null) {
+            return Map.of("status", "error", "message", "User not found");
+        }
+
+        // 2. Check if user has a car registered
+        String carObj = user.carRegistrationPlate;
+        if (carObj == null) {
+            return Map.of("status", "error", "message", "Car registration not found");
+        }
+
+        // 3. Check if free wash is available
+        if (user.freeWashCount == 2) {
+            // 4. Generate 6-digit free wash code
+            String freeWashCode = generateVerificationCode();
+
+            // 5. Mark as used
+            user.freeWashCount = 1;
+            user.freewashCode = freeWashCode;
+            userRepoReg.save(user);
+
+            return Map.of(
+                    "status", "success",
+                    "message", "Enjoy your free wash!",
+                    "freeWashCode", freeWashCode
+            );
+        } else {
+            return Map.of("status", "error", "message", "You have already used your free wash");
+        }
+    }
+
+    public Object login(String email, String password) {
+        ExpandoObj user = userRepoReg.findByEmail(email);
+
+        if (user == null) {
+            return Map.of("status", "error", "message", "User not found");
+        }
+        if (!user.verified) {
+            return Map.of("status", "error", "message", "User not verified. Check email.");
+        }
+        if (!user.f_password.equals(password)) {
+            return Map.of("status", "error", "message", "Invalid credentials");
+        }
+
+        String token = jwtUtil.generateToken(email);
+        return Map.of("status", "success", "token", token);
+    }
+
 
     public Object registerNewUser(UserCRUDGenModal user) {
         String email = user.f_email;
@@ -83,10 +129,13 @@ public class UserService {
         expandoObj.f_Lastname = user.f_Lastname;
         expandoObj.email = user.f_email;
         expandoObj.f_password = user.f_password;
+        expandoObj.carRegistrationPlate = user.carRegistrationPlate;
 
+        ExpandoObj saved = userRepoReg.save(expandoObj);
+        emailService.sendVerificationEmail(user.f_email, expandoObj.verificationCode);
 
-        // Save and return
-        return userRepoReg.save(expandoObj);
+        saved.setMessage("Verification code sent to: " + user.f_email);
+        return saved;
     }
 
     public Object verifyUser(String code) {
@@ -116,6 +165,8 @@ public class UserService {
     private String generateVerificationCode() {
         return String.format("%06d", random.nextInt(1_000_000)); // 6-digit code
     }
+
+
 
 //    public boolean carPlateExists(String carPlate) {
 //        return userRepository.existsByCarRegistrationPlate(carPlate);

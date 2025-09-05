@@ -12,6 +12,11 @@ public class ExpandoObj{
     public String f_Firstname;
     public String f_Lastname;
     public String f_password;
+    public String carRegistrationPlate;
+    public int freeWashCount = 2;
+
+    public String freewashCode = "";
+
 //    public UserCRUDGenModal user;
 
     private String message;
