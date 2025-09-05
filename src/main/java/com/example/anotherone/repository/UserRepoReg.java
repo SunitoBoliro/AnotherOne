@@ -1,7 +1,13 @@
 package com.example.anotherone.repository;
 
-import com.example.anotherone.model.UserCRUDGenModal;
+import com.example.anotherone.model.ExpandoObj;
 import org.springframework.data.mongodb.repository.MongoRepository;
+import org.springframework.stereotype.Repository;
 
-public interface UserRepoReg extends MongoRepository<UserCRUDGenModal, String> {
-}
+@Repository
+public interface UserRepoReg extends MongoRepository<ExpandoObj, String> {
+    ExpandoObj findByVerificationCode(String code);  // find user by verification code
+
+    ExpandoObj findByEmail(String email);
+ }
+

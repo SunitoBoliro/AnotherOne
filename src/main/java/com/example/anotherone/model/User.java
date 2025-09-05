@@ -14,7 +14,6 @@ public class User {
     private String carRegistrationPlate;  // ✅ new field
 
     // No-args constructor
-    public User() {}
 
     // All-args constructor
     public User(String id, String firstName, String lastName, String email, String carRegistrationPlate) {
