@@ -6,6 +6,8 @@ import com.example.anotherone.model.ExpandoObj;
 import com.example.anotherone.model.UserCRUDGenModal;
 import com.example.anotherone.repository.UserRepoReg;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.security.SecureRandom;
@@ -16,14 +18,16 @@ import java.util.Objects;
 public class UserService {
 
     private static final SecureRandom random = new SecureRandom();
-    private UserRepoReg userRepoReg;
-    private EmailService emailService;
-    private JwtUtil jwtUtil;
+    private final UserRepoReg userRepoReg;
+    private final EmailService emailService;
+    private final JwtUtil jwtUtil;
+    private final PasswordEncoder passwordEncoder;
 
     public UserService(UserRepoReg userRepoReg, EmailService emailService, JwtUtil jwtUtil) {
         this.userRepoReg = userRepoReg;
         this.emailService = emailService;
         this.jwtUtil = jwtUtil;
+        this.passwordEncoder = new BCryptPasswordEncoder(); // default strength
     }
     // ----------------- Registration & Verification -----------------
 
@@ -102,7 +106,7 @@ public class UserService {
         if (!user.verified) {
             return Map.of("status", "error", "message", "User not verified. Check email.");
         }
-        if (!user.f_password.equals(password)) {
+        if (!passwordEncoder.matches(password, user.f_password)) {
             return Map.of("status", "error", "message", "Invalid credentials");
         }
 
@@ -128,7 +132,7 @@ public class UserService {
         expandoObj.f_Firstname = user.f_Firstname;
         expandoObj.f_Lastname = user.f_Lastname;
         expandoObj.email = user.f_email;
-        expandoObj.f_password = user.f_password;
+        expandoObj.f_password = passwordEncoder.encode(user.f_password);
         expandoObj.carRegistrationPlate = user.carRegistrationPlate;
 
         ExpandoObj saved = userRepoReg.save(expandoObj);
