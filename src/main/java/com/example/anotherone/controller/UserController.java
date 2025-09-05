@@ -81,8 +81,6 @@ public class UserController {
 
 package com.example.anotherone.controller;
 
-import com.example.anotherone.model.ExpandoObj;
-import com.example.anotherone.model.User;
 import com.example.anotherone.model.UserCRUDGenModal;
 import com.example.anotherone.service.UserService;
 import org.springframework.http.HttpStatus;
@@ -109,17 +107,28 @@ public class UserController {
         this.userService = userService;
     }
 
-    @GetMapping
-    @Operation(summary = "Get all users")
-    public List<User> getAllUsers() {
-        return userService.getAllUsers();
-    }
-
-
     @PostMapping("/{reg-user}")
     @Operation(summary = "Create new User with email, password and verification Code")
     public List<Object> registerUser(@RequestBody UserCRUDGenModal userCRUDGenModal) {
         return Collections.singletonList(userService.registerNewUser(userCRUDGenModal));
+    }
+
+    @GetMapping("login/{email}/{password}")
+    @Operation(summary = "Login with the Same Login Credentials")
+    public Object loginUser(@PathVariable String email, @PathVariable String password) {
+        return userService.login(email, password);
+    }
+
+    @GetMapping("free-wash/{email}/{carRegNum}")
+    @Operation(summary = "Login with the Same Login Credentials")
+    public Object usefreeWash(@PathVariable String email, @PathVariable String carRegNum) {
+        return userService.useFreeWash(email, carRegNum);
+    }
+
+    @GetMapping("use-free-wash/{email}/{carRegNum}/{code}")
+    @Operation(summary = "Login with the Same Login Credentials")
+    public Object usefreeWashend(@PathVariable String email, @PathVariable String carRegNum,  @PathVariable String code) {
+        return userService.enduseFreeWash(email, carRegNum, code);
     }
 
     @GetMapping("/verify/{code}")
@@ -135,36 +144,5 @@ public class UserController {
         return ResponseEntity.ok(verifiedUser);
     }
 
-
-    @GetMapping("/{id}")
-    @Operation(summary = "Get user by ID")
-    public Optional<User> getUserById(@PathVariable String id) {
-        return userService.getUserById(id);
-    }
-
-    @PostMapping
-    @Operation(summary = "Create a new user")
-    public User createUser(@RequestBody User user) {
-        return userService.saveUser(user); // ✅ now it calls createUser, not saveUser
-    }
-
-    @PutMapping("/{id}")
-    @Operation(summary = "Update a user by ID")
-    public Optional<User> updateUser(@PathVariable String id, @RequestBody User user) {
-        return userService.updateUser(id, user);
-    }
-
-    @PutMapping("/{id}/car-plate")
-    @Operation(summary = "Update only the car registration plate of a user")
-    public Optional<User> updateCarPlate(@PathVariable String id, @RequestParam String carRegistrationPlate) {
-        return userService.updateCarRegistrationPlate(id, carRegistrationPlate);
-    }
-
-    @DeleteMapping("/{id}")
-    @Operation(summary = "Delete a user by ID")
-    public String deleteUser(@PathVariable String id) {
-        boolean deleted = userService.deleteUser(id);
-        return deleted ? "User deleted successfully" : "User not found";
-    }
 
 }
