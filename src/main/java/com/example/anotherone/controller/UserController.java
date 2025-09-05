@@ -128,7 +128,7 @@ public class UserController {
     @GetMapping("use-free-wash/{email}/{carRegNum}/{code}")
     @Operation(summary = "Login with the Same Login Credentials")
     public Object usefreeWashend(@PathVariable String email, @PathVariable String carRegNum,  @PathVariable String code) {
-        return userService.enduseFreeWash(email, carRegNum, code);
+        return userService.useFreeWash(email, carRegNum, code);
     }
 
     @GetMapping("/verify/{code}")
