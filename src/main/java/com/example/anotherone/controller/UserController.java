@@ -118,14 +118,14 @@ public class UserController {
 
     @PostMapping("/{reg-user}")
     @Operation(summary = "Create new User with email, password and verification Code")
-    public List<ExpandoObj> registerUser(@RequestBody UserCRUDGenModal userCRUDGenModal) throws UserService.EmailAlreadyExistsException {
+    public List<Object> registerUser(@RequestBody UserCRUDGenModal userCRUDGenModal) {
         return Collections.singletonList(userService.registerNewUser(userCRUDGenModal));
     }
 
     @GetMapping("/verify/{code}")
     @Operation(summary = "Verify user with code")
-    public ResponseEntity<?> verifyUser(@PathVariable String code) throws UserService.UserNotFoundException {
-        ExpandoObj verifiedUser = userService.verifyUser(code);
+    public ResponseEntity<?> verifyUser(@PathVariable String code){
+        Object verifiedUser = userService.verifyUser(code);
 
         if (verifiedUser == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)

@@ -1,14 +1,10 @@
 package com.example.anotherone.service;
 
-import com.example.anotherone.model.ExistingEmails;
 import com.example.anotherone.model.ExpandoObj;
 import com.example.anotherone.model.User;
 import com.example.anotherone.model.UserCRUDGenModal;
-import com.example.anotherone.repository.UserEmailExist;
 import com.example.anotherone.repository.UserRepoReg;
 import com.example.anotherone.repository.UserRepository;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.security.SecureRandom;
@@ -18,17 +14,14 @@ import java.util.Optional;
 @Service
 public class UserService {
 
-    private static final Logger logger = LoggerFactory.getLogger(UserService.class);
     private static final SecureRandom random = new SecureRandom();
 
     private final UserRepository userRepository;
     private final UserRepoReg userRepoReg;
-    private final UserEmailExist userEmailExist;
 
-    public UserService(UserRepository userRepository, UserRepoReg userRepoReg, UserEmailExist userEmailExist) {
+    public UserService(UserRepository userRepository, UserRepoReg userRepoReg) {
         this.userRepository = userRepository;
         this.userRepoReg = userRepoReg;
-        this.userEmailExist = userEmailExist;
     }
 
     // ----------------- CRUD Operations -----------------
@@ -72,43 +65,50 @@ public class UserService {
 
     // ----------------- Registration & Verification -----------------
 
-    public ExpandoObj registerNewUser(UserCRUDGenModal user) throws EmailAlreadyExistsException {
+    public Object registerNewUser(UserCRUDGenModal user) {
         String email = user.f_email;
 
         // Check if email already exists
-        if (userEmailExist.findByEmail(email).isPresent()) {
-            logger.warn("User already exists with email: {}", email);
-            throw new EmailAlreadyExistsException("User already exists with email: " + email);
+        if (userRepoReg.findByEmail(email) != null) {
+            ExpandoObj ex = new ExpandoObj();
+            ex.setMessage("User Already Exist, Just Need to Verify!");
+            return ex.getMessage();
         }
 
         // Create registration object
         ExpandoObj expandoObj = new ExpandoObj();
         expandoObj.verificationCode = generateVerificationCode();
         expandoObj.verified = false;
-        expandoObj.user = user;
+        expandoObj.f_Firstname = user.f_Firstname;
+        expandoObj.f_Lastname = user.f_Lastname;
+        expandoObj.email = user.f_email;
+        expandoObj.f_password = user.f_password;
+
 
         // Save and return
         return userRepoReg.save(expandoObj);
     }
 
-    public ExpandoObj verifyUser(String code) throws UserNotFoundException {
+    public Object verifyUser(String code) {
         ExpandoObj expandoObj = userRepoReg.findByVerificationCode(code);
+        System.out.println(expandoObj);
+
         if (expandoObj == null) {
-            logger.warn("No user found with verification code: {}", code);
-            throw new UserNotFoundException("No user found with verification code: " + code);
+            ExpandoObj response = new ExpandoObj();
+            response.setMessage("No user found with verification code: " + code);
+            return response.getMessage();
         }
 
         if (!expandoObj.verified) {
             expandoObj.verified = true;
             expandoObj.verificationCode = "VERIFIED";
             userRepoReg.save(expandoObj);
-            userEmailExist.save(new ExistingEmails(expandoObj.user.f_email));
-            logger.info("User verified successfully: {}", expandoObj.user.f_email);
+            expandoObj.setMessage("User verified successfully: " + expandoObj.email);
         } else {
-            logger.info("User already verified: {}", expandoObj.user.f_email);
+            expandoObj.setMessage("User already verified: " + expandoObj.email);
         }
 
-        return expandoObj;
+        return expandoObj.getMessage();
     }
 
     // ----------------- Utility Methods -----------------
